@@ -17,4 +17,4 @@ CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP --  创建记录时间，�
 
 ) ENGINE MYISAM;
 
-CREATE INDEX idx_personal_assem_changed_orderid_assem_id ON t_personal_assem_changed ( ORDER_ID, ASSEM_ID );
+CREATE INDEX idx_personal_assem_changed_orderid_assem_id ON t_personal_assem_changed ( ORDER_ID, ELEMENT_ASSEM_ID );
