@@ -14,7 +14,9 @@
 
 from . import db
 from .models import DockingLisDict, DockingLisFollowing, DockingPacsWjzFollowing, DockingPacsDict, DockingPacsFollowing, \
-    DockingLisWjzFollowing
+    DockingLisWjzFollowing, DockingLisRequestView
+
+from sqlalchemy import and_
 
 
 def insert_lis_dict(lis_dict):
@@ -295,6 +297,31 @@ def insert_pacs_wjz_following(pacs_wjz_following_dict):
 
             db.session.add(pacsWjzFollowing)
         db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+# DockingLisRequestView
+def get_assem_info_by_barcode(barcode):
+    """
+    根据条码号，获取项目组、项目信息
+    :param barcode:
+    :return:
+    """
+    try:
+        return db.session.query(DockingLisRequestView).filter(
+
+            and_(
+                DockingLisRequestView.BARCODE_ID == barcode,
+                DockingLisRequestView.SPECIMEN_TYPE != '20',
+                DockingLisRequestView.SPECIMEN_TYPE != None
+
+            )
+
+        ).all()
     except Exception as e:
         db.session.rollback()
         raise e

@@ -57,76 +57,11 @@ if __name__ == '__main__':
 
     # log.info(redis.get('wdh.ho'))
 
-    from app.websrv import _check_params
+    from app.websrv import check_params
 
-    params = """
+    from app.request_lis import request_to_lis
+    from app.utils import to_xml,get_init_dict
 
-        <PARAMS> 
-          <FORMLISTS> 
-            <FORMLIST> 
-              <YLJGDM>310112001</YLJGDM>  
-              <SQDH>2323</SQDH>  
-              <BRID>111</BRID>  
-              <BRXM>张三</BRXM>  
-              <BRXB>1</BRXB>  
-              <BRNL>22</BRNL>  
-              <LXDH>132111111</LXDH>  
-              <JTDZ>虹桥路1001号</JTDZ>  
-              <YWLSH>321231</YWLSH>  
-              <MZBZ>1</MZBZ>  
-              <YXHM>0010</YXHM>  
-              <JCXM>1212</JCXM>  
-              <JCSJ>2018-11-11 10:10:10</JCSJ>  
-              <JCLX>01</JCLX>  
-              <XMDM>11</XMDM>  
-              <JCBW>心脏</JCBW>  
-              <BWBM/>  
-              <JCMC>电脑多导联心电图</JCMC>  
-              <YYBZ>1</YYBZ>  
-              <YXBX>窦性心律；ST-T改变；</YXBX>  
-              <JCTS>窦性心律；ST-T改变；</JCTS>  
-              <JYBZ>窦性心律；ST-T改变；</JYBZ>  
-              <WJZBZ>1</WJZBZ>  
-              <SBM>SBM001</SBM>  
-              <BZ>紧急问题，请处理！</BZ> 
-            </FORMLIST>  
-            <FORMLIST> 
-              <YLJGDM>310112001</YLJGDM>  
-              <SQDH>2323</SQDH>  
-              <BRID>111</BRID>  
-              <BRXM>张三</BRXM>  
-              <BRXB>1</BRXB>  
-              <BRNL>22</BRNL>  
-              <LXDH>132111111</LXDH>  
-              <JTDZ>虹桥路1001号</JTDZ>  
-              <YWLSH>321231</YWLSH>  
-              <MZBZ>1</MZBZ>  
-              <YXHM>0010</YXHM>  
-              <JCXM>1212</JCXM>  
-              <JCSJ>2018-11-11 10:10:10</JCSJ>  
-              <JCLX>01</JCLX>  
-              <XMDM>11</XMDM>  
-              <JCBW>心脏</JCBW>  
-              <BWBM/>  
-              <JCMC>电脑多导联心电图</JCMC>  
-              <YYBZ>1</YYBZ>  
-              <YXBX>窦性心律；ST-T改变；</YXBX>  
-              <JCTS>窦性心律；ST-T改变；</JCTS>  
-              <JYBZ>窦性心律；ST-T改变；</JYBZ>  
-              <WJZBZ>1</WJZBZ>  
-              <SBM>SBM002</SBM>  
-              <BZ>紧急问题，请处理！</BZ> 
-            </FORMLIST> 
-          </FORMLISTS>  
-          <SQJGDM>110112001</SQJGDM>  
-          <TOKEN>12iui2912k</TOKEN> 
-        </PARAMS>
-
-    """
-    # d = _check_params(params, 'PARAMS')
-    # print(d.get('PARAMS').get('YLJGDM'))
-    from app.websrv import WebService
-
-    web = WebService()
-    r = web.pacsWjz(params)
-    log.info(r)
+    r = get_init_dict()
+    request_to_lis(331228, '121121', '43463423423', '232323', 'ACDDE@@@', '111111',r)
+    log.info(to_xml(r))

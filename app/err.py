@@ -24,3 +24,17 @@ class InvalidParamException(Exception):
 
     def __repr__(self):
         return "[{0}]{1}".format(self.__class__.__name__, self.msg)
+
+
+class NotFoundException(Exception):
+    """
+      XML输入异常
+    """
+
+    def __init__(self, msg):
+        self.msg = msg
+        self.errcode = 404
+
+    def __repr__(self):
+        return "[{0}]{1}".format(self.__class__.__name__, self.msg)
+

@@ -183,3 +183,32 @@ class DockingPacsWjzFollowing(db.Model):
     SBM = db.Column(db.String)
     BZ = db.Column(db.String)
     TOKEN = db.Column(db.String)
+
+
+class DockingLisRequestView(db.Model):
+    """
+     通过样本号查询项目信息视图
+    """
+    __tablename__ = 'v_docking_lis_request_view'
+    ID = db.Column(db.String, primary_key=True)
+    BARCODE_ID = db.Column(db.String)
+    ORDER_ID = db.Column(db.String)
+    # ELEMENT_ASSEM_ID = db.Column(db.String)
+    SPECIMEN_TYPE = db.Column(db.String)
+    SPECIMEN_TYPE_NAME = db.Column(db.String)
+    ASSEM_CODE = db.Column(db.String)
+    ASSEM_NAME = db.Column(db.String)
+    ELEMENT_CODE = db.Column(db.String)
+    ELEMENT_NAME = db.Column(db.String)
+    USERNAME = db.Column(db.String)
+    SEX = db.Column(db.String)
+    AGE = db.Column(db.Integer)
+    INITIATOR = db.Column(db.String)
+    INITIAL_TIME = db.Column(db.DateTime)
+    BIRTHDAY = db.Column(db.Date)
+    ADDRESS = db.Column(db.String)
+    TELEPHONE = db.Column(db.String)
+    CERT_TYPE = db.Column(db.String)
+    CERT_ID = db.Column(db.String)
+    ARRIVAL_DATE = db.Column(db.DateTime)
+    DEPARMENT = db.Column(db.String)

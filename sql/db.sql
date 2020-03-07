@@ -229,6 +229,127 @@ CREATE TABLE t_docking_pacs_wjz_following (
 );
 GRANT SELECT,DELETE,UPDATE,INSERT ON t_docking_pacs_wjz_following TO 'third' @'%';
 
+------------------------------------------------------------------------------------------------------------------------
+
+-- 对接使用的条码变化流水表
+
+DROP TABLE
+IF
+	EXISTS t_docking_barcode_changed;
+CREATE TABLE t_docking_barcode_changed (
+		ID BIGINT NOT NULL auto_increment PRIMARY KEY,
+		ORDER_ID INT NOT NULL,
+		BARCODE_ID bigint NOT NULL,
+		BARCODE_ASSEM_TYPE_ID INT NOT NULL,
+		ASSEM_SHORT_NAMES VARCHAR(500) NOT NULL,
+		DELIVERY_SYMBOL VARCHAR ( 4 ) NOT NULL,
+		INITIATOR INT NOT NULL,
+		INITIAL_TIME datetime NOT NULL,
+		OP_TYPE VARCHAR ( 10 ) NOT NULL,-- 操作类型 有新增、修改、删除
+		CHANGE_USER INT,
+		CHANGE_TIME datetime,
+		REQ_NO VARCHAR ( 100 ),-- 申请单号
+		REQ_TIME datetime,-- 申请时间
+		REQ_STATUS VARCHAR ( 10 ),-- 申请状态,0为失败 1为成功
+		REQ_MSG VARCHAR ( 1000 ) -- 申请返回的消息
+
+);
+CREATE INDEX idx_docking_barcod_changed_order_id ON t_docking_barcode_changed ( ORDER_ID );
+CREATE INDEX idx_docking_barcod_changed_order_id ON ( ORDER_ID );
+GRANT SELECT
+	,
+	DELETE,
+	UPDATE,
+INSERT ON t_docking_barcode_changed TO 'third' @'%';
+
+
+
+drop TRIGGER if EXISTS tr_barcode_insert;
+
+create TRIGGER tr_barcode_insert
+after insert on t_barcode
+for each row
+begin
+  insert into t_docking_barcode_changed (ORDER_ID,BARCODE_ID,BARCODE_ASSEM_TYPE_ID,ASSEM_SHORT_NAMES,DELIVERY_SYMBOL,INITIATOR,INITIAL_TIME,OP_TYPE,CHANGE_USER,CHANGE_TIME)
+	VALUES (NEW.ORDER_ID,NEW.ID,NEW.BARCODE_ASSEM_TYPE_ID,NEW.ASSEM_SHORT_NAMES,NEW.DELIVERY_SYMBOL,NEW.INITIATOR,NEW.INITIAL_TIME,'新增',NEW.CHANGE_USER,NEW.CHANGE_TIME);
+end;
+
+
+drop TRIGGER if EXISTS tr_barcode_update;
+
+create TRIGGER tr_barcode_update
+after update on t_barcode
+for each row
+begin
+  insert into t_docking_barcode_changed (ORDER_ID,BARCODE_ID,BARCODE_ASSEM_TYPE_ID,ASSEM_SHORT_NAMES,DELIVERY_SYMBOL,INITIATOR,INITIAL_TIME,OP_TYPE,CHANGE_USER,CHANGE_TIME)
+	VALUES (NEW.ORDER_ID,NEW.ID,NEW.BARCODE_ASSEM_TYPE_ID,NEW.ASSEM_SHORT_NAMES,NEW.DELIVERY_SYMBOL,NEW.INITIATOR,NEW.INITIAL_TIME,'修改',NEW.CHANGE_USER,NEW.CHANGE_TIME);
+end;
+
+
+drop TRIGGER if EXISTS tr_barcode_delete;
+
+create TRIGGER tr_barcode_delete
+after delete on t_barcode
+for each row
+begin
+  insert into t_docking_barcode_changed (ORDER_ID,BARCODE_ID,BARCODE_ASSEM_TYPE_ID,ASSEM_SHORT_NAMES,DELIVERY_SYMBOL,INITIATOR,INITIAL_TIME,OP_TYPE,CHANGE_USER,CHANGE_TIME)
+	VALUES (OLD.ORDER_ID,OLD.ID,OLD.BARCODE_ASSEM_TYPE_ID,OLD.ASSEM_SHORT_NAMES,OLD.DELIVERY_SYMBOL,OLD.INITIATOR,OLD.INITIAL_TIME,'删除',OLD.CHANGE_USER,OLD.CHANGE_TIME);
+end;
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- 通过样本号查询项目信息视图
+
+DROP VIEW IF EXISTS v_docking_lis_request_view;
+CREATE VIEW v_docking_lis_request_view AS SELECT
+        concat( barcode.ORDER_ID, '-', element.id ) AS ID,
+        barcode.ID AS BARCODE_ID,
+        barcode.ORDER_ID,
+        barcodedetail.ELEMENT_ASSEM_ID,
+        barcodeclass.SPECIMEN_TYPE,
+        specimen_dict.BASE_VALUE SPECIMEN_TYPE_NAME,
+        assem.EXTERNAL_SYS_CONTROL_CODE ASSEM_CODE,
+        assem.`NAME` ASSEM_NAME,
+        element.EXTERNAL_SYS_CONTROL_CODE ELEMENT_CODE,
+        element.`NAME` ELEMENT_NAME,
+        person.USERNAME,
+        person.SEX,
+        porder.AGE,
+
+        porder.INITIATOR,
+		porder.INITIAL_TIME,
+		person.BIRTHDAY,
+        person.ADDRESS,
+        person.TELEPHONE,
+        person.CERT_TYPE,
+        person.CERT_ID,
+        porder.ARRIVAL_DATE,
+        '体检中心' DEPARMENT
+FROM
+	t_barcode barcode
+	INNER JOIN t_barcode_detail barcodedetail ON barcode.ID = barcodedetail.BARCODE_ID
+	INNER JOIN t_barcode_assem_class barcodeclass ON barcode.BARCODE_ASSEM_TYPE_ID = barcodeclass.ID
+	LEFT JOIN t_base_dict specimen_dict ON barcodeclass.SPECIMEN_TYPE = specimen_dict.BASE_CODE
+	AND specimen_dict.type = '标本类型'
+	INNER JOIN t_element_assem_sub assem ON barcodedetail.ELEMENT_ASSEM_ID = assem.ID
+	INNER JOIN t_element_assem_detail_sub assemdetail ON assem.ID = assemdetail.ELEMENT_ASSEM_ID
+	INNER JOIN t_element_sub element ON assemdetail.ELEMENT_ID = element.ID
+	INNER JOIN t_personal_order porder ON barcode.order_id = porder.id
+	INNER JOIN t_person person ON porder.person_id = person.id;
+
+GRANT SELECT ON
+	v_docking_lis_request_view TO 'third' @'%';
+
+
+
+
+
+
+
+
+
+
+
 
 
 
