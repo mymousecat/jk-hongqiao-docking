@@ -3,17 +3,17 @@
 DROP TABLE IF EXISTS t_personal_assem_changed;
 
 CREATE TABLE t_personal_assem_changed (
-ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-ORDER_ID INT NOT NULL,
-ELEMENT_ASSEM_ID INT NOT NULL,
-UNIT_OR_OWN VARCHAR (20 ) NOT NULL, -- 公费或自费
-COST_STATUS VARCHAR ( 20 ) NOT NULL,-- 收费状态(未收、已收)
-EXAM_STATUS VARCHAR ( 20 ) NOT NULL,-- 体检状态(同体检状态)
-ASSEM_STATUS VARCHAR ( 20 ) NOT NULL,-- 项目组状态(新增、修改、删除)
-DIFFPRICE_STATUS VARCHAR(20) , -- 是否补差价(是,否)，默认为否
-DIFFPRICE_COST_STATUS VARCHAR(20), -- 补差价是否收费（已收、未收）
-OP_ID INT NOT NULL,-- 操作员ID
-CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP --  创建记录时间，默认值为当前时间
+    ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ORDER_ID INT NOT NULL,
+    ELEMENT_ASSEM_ID INT NOT NULL,
+    UNIT_OR_OWN VARCHAR (20 ) NOT NULL, -- 公费或自费
+    COST_STATUS VARCHAR ( 20 ) NOT NULL,-- 收费状态(未收、已收)
+    EXAM_STATUS VARCHAR ( 20 ) NOT NULL,-- 体检状态(同体检状态)
+    ASSEM_STATUS VARCHAR ( 20 ) NOT NULL,-- 项目组状态(新增、修改、删除)
+    DIFFPRICE_STATUS VARCHAR(20) , -- 是否补差价(是,否)，默认为否
+    DIFFPRICE_COST_STATUS VARCHAR(20), -- 补差价是否收费（已收、未收）
+    OP_ID INT NOT NULL,-- 操作员ID
+    CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP --  创建记录时间，默认值为当前时间
 
 ) ENGINE MYISAM;
 
@@ -255,12 +255,13 @@ CREATE TABLE t_docking_barcode_changed (
 
 );
 CREATE INDEX idx_docking_barcod_changed_order_id ON t_docking_barcode_changed ( ORDER_ID );
-CREATE INDEX idx_docking_barcod_changed_order_id ON ( ORDER_ID );
+CREATE INDEX idx_docking_barcod_changed_req_no ON t_docking_barcode_changed ( REQ_NO );
 GRANT SELECT
 	,
 	DELETE,
 	UPDATE,
 INSERT ON t_docking_barcode_changed TO 'third' @'%';
+
 
 
 
@@ -339,6 +340,113 @@ FROM
 
 GRANT SELECT ON
 	v_docking_lis_request_view TO 'third' @'%';
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- 项目变动通知流水表（视图),体检信息、收费都会变动
+
+drop view if EXISTS v_docking_assems_changed;
+
+create view  v_docking_assems_changed as
+SELECT
+	assemchanged.ID,
+	assemchanged.ORDER_ID,
+	assemchanged.ELEMENT_ASSEM_ID,
+	assemchanged.UNIT_OR_OWN,
+	assemchanged.COST_STATUS,
+	assemchanged.EXAM_STATUS,
+	assemchanged.ASSEM_STATUS,
+	assemchanged.OP_ID,
+	assemchanged.DIFFPRICE_STATUS,
+	assemchanged.DIFFPRICE_COST_STATUS,
+    assem.DEPARTMENT_ID,
+    assem.NAME,
+	assem.EXTERNAL_SYS_CONTROL_CODE ASSEM_CODE
+
+FROM
+	t_personal_assem_changed assemchanged
+	inner join t_element_assem_sub assem on assemchanged.ELEMENT_ASSEM_ID = assem.ID;
+
+	grant select on v_docking_assems_changed to 'third'@'%';
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- 预约项目组表
+
+DROP VIEW IF EXISTS v_docking_pacs_request_view;
+
+CREATE VIEW v_docking_pacs_request_view AS SELECT
+        concat( porder.ID, '-', element.id ) AS ID,
+        porder.ID as ORDER_ID,
+        passem.ELEMENT_ASSEM_ID,
+        assem.EXTERNAL_SYS_CONTROL_CODE ASSEM_CODE,
+        assem.`NAME` ASSEM_NAME,
+        element.EXTERNAL_SYS_CONTROL_CODE ELEMENT_CODE,
+        element.`NAME` ELEMENT_NAME,
+		person.USERNAME,
+        person.SEX,
+        porder.AGE,
+        porder.INITIATOR,
+		porder.INITIAL_TIME,
+		person.BIRTHDAY,
+        person.ADDRESS,
+        person.TELEPHONE,
+        person.CERT_TYPE,
+        person.CERT_ID,
+        porder.ARRIVAL_DATE,
+        '体检中心' DEPARMENT,
+        assem.DEPARTMENT_ID
+FROM
+    t_personal_order porder
+    INNER JOIN t_person person ON porder.person_id = person.id
+	INNER JOIN t_person_element_assem passem on porder.id =  passem.order_id  and passem.symbol = '有效'
+	INNER JOIN t_element_assem_sub assem ON passem.ELEMENT_ASSEM_ID = assem.ID
+	INNER JOIN t_element_assem_detail_sub assemdetail ON assem.ID = assemdetail.ELEMENT_ASSEM_ID
+	INNER JOIN t_element_sub element ON assemdetail.ELEMENT_ID = element.ID;
+
+GRANT SELECT ON
+	v_docking_pacs_request_view TO 'third' @'%';
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+-- pacs数据平台上传日志表
+
+DROP TABLE IF EXISTS t_docking_pacs_assem_log;
+
+CREATE TABLE t_docking_pacs_assem_log (
+    ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ORDER_ID INT NOT NULL,
+    USERNAME VARCHAR(50),
+    SEX VARCHAR(10),
+    AGE VARCHAR(10),
+    ASSEM_ID INT NOT NULL,
+    ASSEM_NAME VARCHAR(100),
+    REQ_NO VARCHAR ( 100 ),-- 申请单号
+    REQ_TIME datetime,-- 申请时间
+    REQ_STATUS VARCHAR ( 10 ),-- 申请状态,0为失败 1为成功
+    REQ_MSG VARCHAR ( 1000 ), -- 申请返回的消息
+    CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP --  创建记录时间，默认值为当前时间
+
+) ENGINE MYISAM;
+
+
+create index idx_docking_pacs_assem_log_order_id on t_docking_pacs_assem_log
+(
+   order_id
+);
+
+create index idx_docking_pacs_assem_log_req_no on t_docking_pacs_assem_log
+(
+   req_no
+);
+
+grant select,insert,update,delete on t_docking_pacs_assem_log to 'third'@'%';
+
+
+
+
 
 
 

@@ -115,10 +115,16 @@ class Config:
     IS_SEND_MAIL = False
 
     # 本医疗机构代码
-    YLJGDM = "0011234567"
+    YLJGDM = '310112001'
 
     # 本医疗机构密码
-    YLJGMM = "1234567"
+    YLJGMM = '310112001'
+
+    # 申请医疗机构代码
+    SQJGDM = '310112001'
+
+    # 实验证代码
+    SYSDM = '310112001'
 
     # 平台LIS接口URL
     PLAT_LIS_URL = 'http://55.0.0.1:9090/bsoftHQPlatform/hisToLisWs?wsdl'
@@ -128,6 +134,9 @@ class Config:
 
     # 平台安全接口URL
     PLAT_SECURITY_URL = 'http://55.0.0.1:9090/bsoftHQPlatform/securitykeys?wsdl'
+
+    # 要上传到平台的PACS类科室ID列表
+    PLAT_DEPARMENT_IDS = [5, 6, 20, 21]
 
 #
 # # 每天的19点至23点，0点到6点,每分种

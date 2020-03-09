@@ -22,46 +22,17 @@ load_my_logging_cfg('test')
 
 if __name__ == '__main__':
     log.info('测试日志')
-    # log.info(redis_store.set('ho'))
-    # redis.getset('wdh.ho', 'token', ex=20)
-    # redis.expireat('wdh.ho','2020-03-03 18:33:00');
-    # redis.set('wdh.ho', 'token')
-    # redis.expireat('wdh.ho', datetime.datetime.now() + datetime.timedelta(seconds=30))
-    # redis.pexpireat()
 
-    # log.info(datetime.datetime.now().timetuple())
-
-    # now = datetime.datetime(year=2020, month=3, day=3)
-    # log.info((now.time().max - now.time()).seconds)
-
-    # log.info(now.time().max.hour - now.time().second)
-    # max = now.replace(hour=23, minute=59, second=59, microsecond=999999)
-
-    # max = datetime.datetime.combine(now.today(), now.time().max)
-
-    # log.info(max)
+    # from app.request_lis import request_to_lis
+    # from app.utils import to_xml, get_init_dict
     #
-    # log.info((max - now).seconds)
+    # r = get_init_dict()
+    # request_to_lis(barcode=331228, YLJGDM='121121', YLJGMM='43463423423', SYSDM='232323', SQJGDM='ACDDE@@@',
+    #                build_dict=r)
+    # log.info(to_xml(r))
 
-    # redis.expireat()
+    from app.utils import get_barcode_from_webservice
 
-    # print(d)
+    from app.task_to_pacs import to_pacs
+    to_pacs()
 
-    # ex = (max - now).seconds
-    #
-    # mex = (max - now).seconds
-    #
-    # log.info('ex={}'.format(mex))
-    #
-    # redis.set('wdh.ho', 'hello world', ex=ex)
-
-    # log.info(redis.get('wdh.ho'))
-
-    from app.websrv import check_params
-
-    from app.request_lis import request_to_lis
-    from app.utils import to_xml,get_init_dict
-
-    r = get_init_dict()
-    request_to_lis(331228, '121121', '43463423423', '232323', 'ACDDE@@@', '111111',r)
-    log.info(to_xml(r))

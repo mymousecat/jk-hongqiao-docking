@@ -13,10 +13,19 @@
 """
 
 from . import db
-from .models import DockingLisDict, DockingLisFollowing, DockingPacsWjzFollowing, DockingPacsDict, DockingPacsFollowing, \
-    DockingLisWjzFollowing, DockingLisRequestView
+from .models import DockingLisDict, \
+    DockingLisFollowing, \
+    DockingPacsWjzFollowing, \
+    DockingPacsDict, \
+    DockingPacsFollowing, \
+    DockingLisWjzFollowing, \
+    DockingLisRequestView, \
+    DockingBarcodeChanged, \
+    DockingAssemsChanged, \
+    DockingPacsRequestView, \
+    DockingPacsAssemLog
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 
 def insert_lis_dict(lis_dict):
@@ -322,6 +331,114 @@ def get_assem_info_by_barcode(barcode):
             )
 
         ).all()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+def get_barcode_changed(id):
+    """
+    根据id获取当前变化的条码信息
+    :param id:
+    :return:
+    """
+    try:
+        query = db.session.query(DockingBarcodeChanged)
+        if id is not None:
+            query = query.filter(DockingBarcodeChanged.ID > id)
+        return query.first()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+def save_barcode_changed(barcode_changed):
+    """
+    保存条码变动信息
+    :param barcode_changed:
+    :return:
+    """
+    try:
+        db.session.merge(barcode_changed)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+def get_pacs_assem_by_id(id, department_id_list):
+    """
+    根据id获取相对应科室的已收费、已报道状态的体检人员项目信息，以便进行申请
+    :param id:
+    :return:
+    """
+    try:
+        query = db.session.query(DockingAssemsChanged)
+        if id is not None:
+            query = query.filter(DockingAssemsChanged.ID > id)
+
+        query = query.filter(
+            or_(
+                and_(DockingAssemsChanged.UNIT_OR_OWN == '自费', DockingAssemsChanged.COST_STATUS == '已收'),
+                and_(DockingAssemsChanged.UNIT_OR_OWN == '公费', DockingAssemsChanged.DIFFPRICE_STATUS == '否'),
+                and_(DockingAssemsChanged.UNIT_OR_OWN == '公费', DockingAssemsChanged.DIFFPRICE_STATUS == '是',
+                     DockingAssemsChanged.DIFFPRICE_COST_STATUS == '已收')
+
+            )
+        )
+
+        query = query.filter(DockingAssemsChanged.EXAM_STATUS.in_(('已报到', '分科检查', '等待审核')))
+
+        query = query.filter(DockingAssemsChanged.ASSEM_STATUS.in_(('新增', '修改')))
+
+        query = query.filter(DockingAssemsChanged.DEPARTMENT_ID.in_(department_id_list))
+
+        return query.first()
+
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+def get_assem_info_by_order_assem_id(order_id, assem_id):
+    """
+    通过预约号和项目组ID来获取项目信息列表
+    :param order_id:
+    :param assem_id:
+    :return:
+    """
+    # DockingPacsRequestView
+    try:
+        return db.session.query(DockingPacsRequestView).filter(and_(
+            DockingPacsRequestView.ORDER_ID == order_id,
+            DockingPacsRequestView.ELEMENT_ASSEM_ID == assem_id
+
+        )).all()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+# DockingPacsAssemLog
+def save_pacs_assem_log(log):
+    """
+    保存pacs上传平台的日志
+    :param log:
+    :return:
+    """
+    try:
+        db.session.add(log)
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         raise e

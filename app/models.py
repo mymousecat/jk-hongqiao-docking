@@ -212,3 +212,91 @@ class DockingLisRequestView(db.Model):
     CERT_ID = db.Column(db.String)
     ARRIVAL_DATE = db.Column(db.DateTime)
     DEPARMENT = db.Column(db.String)
+
+
+# t_docking_barcode_changed
+class DockingBarcodeChanged(db.Model):
+    __tablename__ = 't_docking_barcode_changed'
+    ID = db.Column(db.BigInteger, primary_key=True)
+    ORDER_ID = db.Column(db.String)
+    BARCODE_ID = db.Column(db.String)
+    BARCODE_ASSEM_TYPE_ID = db.Column(db.String)
+    ASSEM_SHORT_NAMES = db.Column(db.String)
+    DELIVERY_SYMBOL = db.Column(db.String)
+    INITIATOR = db.Column(db.String)
+    INITIAL_TIME = db.Column(db.DateTime)
+    OP_TYPE = db.Column(db.String)
+    CHANGE_USER = db.Column(db.String)
+    CHANGE_TIME = db.Column(db.DateTime)
+    REQ_NO = db.Column(db.String)
+    REQ_TIME = db.Column(db.String)
+    REQ_STATUS = db.Column(db.String)
+    REQ_MSG = db.Column(db.String)
+
+
+# v_docking_assems_changed
+class DockingAssemsChanged(db.Model):
+    """
+      项目变动通知流水表（视图),体检信息、收费都会变动
+    """
+    __tablename__ = 'v_docking_assems_changed'
+    ID = db.Column(db.Integer, primary_key=True)
+    ORDER_ID = db.Column(db.String)
+    ELEMENT_ASSEM_ID = db.Column(db.String)
+    UNIT_OR_OWN = db.Column(db.String)
+    COST_STATUS = db.Column(db.String)
+    EXAM_STATUS = db.Column(db.String)
+    ASSEM_STATUS = db.Column(db.String)
+    OP_ID = db.Column(db.String)
+    DIFFPRICE_STATUS = db.Column(db.String)
+    DIFFPRICE_COST_STATUS = db.Column(db.String)
+    DEPARTMENT_ID = db.Column(db.String)
+    NAME = db.Column(db.String)
+    ASSEM_CODE = db.Column(db.String)
+
+
+# v_docking_pacs_request_view
+class DockingPacsRequestView(db.Model):
+    """
+      预约项目组表
+    """
+    __tablename__ = 'v_docking_pacs_request_view'
+    ID = db.Column(db.String, primary_key=True)
+    ORDER_ID = db.Column(db.String)
+    ELEMENT_ASSEM_ID = db.Column(db.String)
+    ASSEM_CODE = db.Column(db.String)
+    ASSEM_NAME = db.Column(db.String)
+    ELEMENT_CODE = db.Column(db.String)
+    ELEMENT_NAME = db.Column(db.String)
+    USERNAME = db.Column(db.String)
+    SEX = db.Column(db.String)
+    AGE = db.Column(db.Integer)
+    INITIATOR = db.Column(db.String)
+    INITIAL_TIME = db.Column(db.DateTime)
+    BIRTHDAY = db.Column(db.Date)
+    ADDRESS = db.Column(db.String)
+    TELEPHONE = db.Column(db.String)
+    CERT_TYPE = db.Column(db.String)
+    CERT_ID = db.Column(db.String)
+    ARRIVAL_DATE = db.Column(db.DateTime)
+    DEPARMENT = db.Column(db.String)
+    DEPARTMENT_ID = db.Column(db.Integer)
+
+
+# t_docking_pacs_assem_log
+class DockingPacsAssemLog(db.Model):
+    """
+     pacs数据平台上传日志表
+    """
+    __tablename__ = 't_docking_pacs_assem_log'
+    ID = db.Column(db.Integer, primary_key=True)
+    ORDER_ID = db.Column(db.String)
+    USERNAME = db.Column(db.String)
+    SEX = db.Column(db.String)
+    AGE = db.Column(db.String)
+    ASSEM_ID = db.Column(db.String)
+    ASSEM_NAME = db.Column(db.String)
+    REQ_NO = db.Column(db.String)
+    REQ_TIME = db.Column(db.DateTime)
+    REQ_STATUS = db.Column(db.String)
+    REQ_MSG = db.Column(db.String)
