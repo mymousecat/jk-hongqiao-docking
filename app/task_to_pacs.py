@@ -53,7 +53,7 @@ def to_pacs():
     try:
         assem_changed = get_pacs_assem_by_id(id, app.config['PLAT_DEPARMENT_IDS'])
         if not assem_changed:
-            log.info('没有在项目组变动表中，发现比ID:{}大的新记录，程序将退出....')
+            log.info('没有在项目组变动表中，发现比ID:{}大的新记录，程序将退出....'.format(id))
             return
         log.info('获取到预约号为:{} 体检状态为:{} 操作状态为:{} 的记录'.format(assem_changed.ORDER_ID, assem_changed.EXAM_STATUS,
                                                            assem_changed.ASSEM_STATUS))

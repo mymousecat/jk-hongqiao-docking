@@ -33,7 +33,7 @@ def to_lis():
     try:
         barcode_changed = get_barcode_changed(id)
         if not barcode_changed:
-            log.info('没有在条码变动表中，发现比ID:{}大的新条码，程序将退出....')
+            log.info('没有在条码变动表中，发现比ID:{}大的新条码，程序将退出....'.format(id))
             return
         log.info('获取到条码号为:{}  操作状态为:{} 的记录'.format(barcode_changed.BARCODE_ID, barcode_changed.OP_TYPE))
         if barcode_changed.OP_TYPE == '删除':
