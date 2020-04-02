@@ -42,6 +42,6 @@ def request_to_pacs(order_id, assem_id, YLJGDM, YLJGMM, SQJGDM, build_dict):
     build_dict['PARAMS']['YLJGDM'] = YLJGDM
     build_dict['PARAMS']['SQJGDM'] = SQJGDM
     build_dict['PARAMS']['SQDH'] = get_sqh('PACS')
-    build_dict['PARAMS']['TOKEN'] = get_token(YLJGDM, YLJGMM, SQJGDM)
+    build_dict['PARAMS']['TOKEN'] = get_token(SQJGDM, YLJGMM, SQJGDM)
     log.info('申请的pacs数据为:{}'.format(build_dict))
-    request_to_pacs(build_dict)
+    req_to_pacs(build_dict)

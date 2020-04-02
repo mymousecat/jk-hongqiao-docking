@@ -23,7 +23,8 @@ from .models import DockingLisDict, \
     DockingBarcodeChanged, \
     DockingAssemsChanged, \
     DockingPacsRequestView, \
-    DockingPacsAssemLog
+    DockingPacsAssemLog, \
+    BarcodeDetail
 
 from sqlalchemy import and_, or_
 
@@ -439,6 +440,43 @@ def save_pacs_assem_log(log):
     try:
         db.session.add(log)
         db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+def get_assems_by_barcode_id(barcode_id):
+    """
+    根据样本号，获取所做的项目组列表
+    :param barcode_id:
+    :return:
+    """
+    r = []
+    try:
+        details = db.session.query(BarcodeDetail).filter(BarcodeDetail.BARCODE_ID == barcode_id).all()
+        for detail in details:
+            r.append(str(detail.ELEMENT_ASSEM_ID))
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+    return r
+
+
+def get_lis_following(id):
+    """
+    根据id，获取一条lis流水表中的数据
+    :param id:
+    :return:
+    """
+    try:
+        query = db.session.query(DockingLisFollowing)
+        if id is not None:
+            query = query.filter(DockingLisFollowing.id > id)
+        return query.first()
     except Exception as e:
         db.session.rollback()
         raise e

@@ -58,10 +58,10 @@ class ToPacs(Command):
     """
 
     def run(self):
-        load_my_logging_cfg('to_lis')
+        load_my_logging_cfg('to_pacs')
         # # 第10秒一次
         scheduler = _get_scheduler()
-        scheduler.add_job(to_lis, id='trans_to_pacs', trigger='cron', second='*/10', replace_existing=True)
+        scheduler.add_job(to_pacs, id='trans_to_pacs', trigger='cron', second='*/10', replace_existing=True)
         _begin_scheduler(scheduler)
 
 

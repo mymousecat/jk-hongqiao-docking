@@ -43,20 +43,20 @@ def request_to_lis(barcode, YLJGDM, YLJGMM, SYSDM, SQJGDM, build_dict):
     build_dict['PARAMS']['SYSDM'] = SYSDM
     build_dict['PARAMS']['SQJGDM'] = SQJGDM
     build_dict['PARAMS']['SQDH'] = get_sqh('LIS')
-    build_dict['PARAMS']['TOKEN'] = get_token(YLJGDM, YLJGMM, SQJGDM)
+    build_dict['PARAMS']['TOKEN'] = get_token(SQJGDM, YLJGMM, SQJGDM)
 
     log.info('开始从平台获取条码号...')
-    zxtm = get_barcode_from_webservice(YLJGDM=YLJGDM,
-                                       SQJGDM=SQJGDM,
-                                       SYSDM=SYSDM,
-                                       SQDH=build_dict['PARAMS']['SQDH'],
-                                       BRID=build_dict['PARAMS']['BRID'],
-                                       YWLSH=build_dict['PARAMS']['YWLSH'],
-                                       MZBZ=build_dict['PARAMS']['MZBZ'],
-                                       BBLX=build_dict['PARAMS']['BBLX'],
-                                       TOKEN=build_dict['PARAMS']['TOKEN']
-                                       )
-    log.info('从平台获取到平台条码号:{}'.format(zxtm))
-    build_dict['PARAMS']['ZXJGTM'] = zxtm
+    # zxtm = get_barcode_from_webservice(YLJGDM=YLJGDM,
+    #                                    SQJGDM=SQJGDM,
+    #                                    SYSDM=SYSDM,
+    #                                    SQDH=build_dict['PARAMS']['SQDH'],
+    #                                    BRID=build_dict['PARAMS']['BRID'],
+    #                                    YWLSH=build_dict['PARAMS']['YWLSH'],
+    #                                    MZBZ=build_dict['PARAMS']['MZBZ'],
+    #                                    BBLX=build_dict['PARAMS']['BBLX'],
+    #                                    TOKEN=build_dict['PARAMS']['TOKEN']
+    #                                    )
+    # log.info('从平台获取到平台条码号:{}'.format(zxtm))
+    # build_dict['PARAMS']['ZXJGTM'] = zxtm
     log.info('申请的lis数据为:{}'.format(build_dict))
     req_to_lis(build_dict)

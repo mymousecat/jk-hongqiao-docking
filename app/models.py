@@ -300,3 +300,11 @@ class DockingPacsAssemLog(db.Model):
     REQ_TIME = db.Column(db.DateTime)
     REQ_STATUS = db.Column(db.String)
     REQ_MSG = db.Column(db.String)
+
+
+class BarcodeDetail(db.Model):
+    __tablename__ = 't_barcode_detail'
+    ID = db.Column(db.Integer, primary_key=True)
+    BARCODE_ID = db.Column(db.String)
+    ELEMENT_ASSEM_ID = db.Column(db.String)
+

@@ -16,7 +16,7 @@ from . import app
 from .request_lis import request_to_lis
 from .db_op import get_barcode_changed, save_barcode_changed
 from .param_config import CurPosParams
-from .err import SkipDelFlagException, NotFoundException
+from .err import SkipDelFlagException, NotFoundException, Response501Exception
 from .utils import get_init_dict
 from datetime import datetime
 import logging
@@ -42,7 +42,7 @@ def to_lis():
         lis_dict = get_init_dict()
 
         request_to_lis(barcode=barcode_changed.BARCODE_ID,
-                       YLJGDM=app.config['YLJGDM'],
+                       YLJGDM=app.config['LIS_YLJGDM'],
                        YLJGMM=app.config['YLJGMM'],
                        SYSDM=app.config['SYSDM'],
                        SQJGDM=app.config['SQJGDM'],
@@ -53,7 +53,8 @@ def to_lis():
         barcode_changed.REQ_MSG = '发送成功'
         cur.save(barcode_changed.ID)
         log.info('发送成功!')
-    except (SkipDelFlagException, NotFoundException) as e:
+    except (SkipDelFlagException, NotFoundException, Response501Exception) as e:
+        # 501错误，是对方LIS平台产生的业务性错误，比如数据已经确认
         barcode_changed.REQ_STATUS = '0'
         barcode_changed.REQ_MSG = repr(e)
         cur.save(barcode_changed.ID)

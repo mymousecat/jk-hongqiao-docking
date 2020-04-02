@@ -114,17 +114,20 @@ class Config:
     # 失败时，是否发送邮件
     IS_SEND_MAIL = False
 
-    # 本医疗机构代码
-    YLJGDM = '310112001'
+    # 影像中心的机构代码
+    PACS_YLJGDM = '2201801150038'
+
+    # LIS的机构代码
+    LIS_YLJGDM = '2201708010062'
 
     # 本医疗机构密码
-    YLJGMM = '310112001'
+    YLJGMM = 'Bsoft@123'
 
     # 申请医疗机构代码
-    SQJGDM = '310112001'
+    SQJGDM = '91310112MA1GC5UX3H'
 
     # 实验证代码
-    SYSDM = '310112001'
+    SYSDM = '991014'
 
     # 平台LIS接口URL
     PLAT_LIS_URL = 'http://55.0.0.1:9090/bsoftHQPlatform/hisToLisWs?wsdl'
@@ -137,6 +140,9 @@ class Config:
 
     # 要上传到平台的PACS类科室ID列表
     PLAT_DEPARMENT_IDS = [5, 6, 20, 21]
+
+    # 检验科科室ID
+    LIS_DEPARTMENT_ID = 3
 
 #
 # # 每天的19点至23点，0点到6点,每分种

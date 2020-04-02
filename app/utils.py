@@ -21,7 +21,11 @@ from .err import InvalidParamException, \
     Response501Exception, \
     ResponseUnkownException
 import datetime
+import logging
+
 from app import redis, app
+
+log = logging.getLogger(__name__)
 
 lis_client = None
 pacs_client = None
@@ -91,13 +95,13 @@ def _get_jclx(department_id):
     备注：目前影像使用(MG、MR、PETMR、PETCT、CT、DX 、US)
     """
     if department_id == 5:
-        return '06'
+        return 'US'
     elif department_id == 6:
-        return '04'
+        return 'DX'
     elif department_id == 20:
-        return '01'
+        return 'CT'
     elif department_id == 21:
-        return '02'
+        return 'MR'
     else:
         return None
 
@@ -143,7 +147,9 @@ def _get_token_by_webservice(YLJGDM, YLJGMM, BCYLJGDM):
     req['PARAMS']['YLJGMM'] = YLJGMM
     req['PARAMS']['BCYLJGDM'] = BCYLJGDM
     client = _get_security_client()
-    return _parse_response(client.queryAQMY(to_xml(req)), 'TOKEN')
+    xml = to_xml(req)
+    log.info('申请token时的参数:[{}]'.format(xml))
+    return _parse_response(client.service.queryAQMY(xml), 'TOKEN')
 
 
 def _get_expire_seconds():
@@ -220,7 +226,7 @@ def check_params(params, must_exist):
 
 
 def to_xml(obj_dict):
-    return xmltodict.unparse(obj_dict, full_document=True, pretty=True, short_empty_elements=True)
+    return xmltodict.unparse(obj_dict, full_document=True, pretty=True)
 
 
 def get_init_dict():
@@ -235,6 +241,41 @@ def get_init_dict():
     return r
 
 
+def build_lis_report(dockingLisFollowing, build_dict):
+    """
+    获取报告ID参数
+    :param dockingLisFollowing:
+    :param build_dict:
+    :return:
+    """
+    build_dict['PARAMS']['YLJGDM'] = dockingLisFollowing.YLJGDM
+    build_dict['PARAMS']['SYSDM'] = dockingLisFollowing.SYSDM
+    build_dict['PARAMS']['BRID'] = dockingLisFollowing.BRID
+    build_dict['PARAMS']['ZXJGTM'] = dockingLisFollowing.ZXTM
+    build_dict['PARAMS']['SQJGDM'] = dockingLisFollowing.SQJGDM
+    build_dict['PARAMS']['KSSJ'] = dockingLisFollowing.SJRQ.strftime('%Y-%m-%d %H:%M:%S')
+    build_dict['PARAMS']['JSSJ'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def build_lis_report_results(dockingLisFollowing, report_no, build_dict):
+    """
+    构建报告结果参数
+    :param dockingLisFollowing:
+    :param report_no:
+    :param build_dict:
+    :return:
+    """
+    build_dict['PARAMS']['YLJGDM'] = dockingLisFollowing.YLJGDM
+    build_dict['PARAMS']['SYSDM'] = dockingLisFollowing.SYSDM
+    build_dict['PARAMS']['BGBH'] = report_no
+    build_dict['PARAMS']['BRID'] = dockingLisFollowing.BRID
+    build_dict['PARAMS']['SQJGTM'] = dockingLisFollowing.SJTM
+    build_dict['PARAMS']['ZXJGTM'] = dockingLisFollowing.ZXTM
+    build_dict['PARAMS']['YWLSH'] = dockingLisFollowing.YWLSH
+    build_dict['PARAMS']['MZBZ'] = dockingLisFollowing.MZBZ
+    build_dict['PARAMS']['SQJGDM'] = dockingLisFollowing.SQJGDM
+
+
 def build_lis(lis_assems_list, build_dict):
     """
     根据数据库返回的项目组结果，按平台要求，生成字典
@@ -245,6 +286,7 @@ def build_lis(lis_assems_list, build_dict):
     for assems in lis_assems_list:
         build_dict['PARAMS']['SJRQ'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         build_dict['PARAMS']['SQJGTM'] = assems.BARCODE_ID
+        build_dict['PARAMS']['ZXJGTM'] = assems.BARCODE_ID
         build_dict['PARAMS']['BRID'] = assems.ORDER_ID
         build_dict['PARAMS']['YWLSH'] = format('{}^{}'.format(assems.ORDER_ID, assems.BARCODE_ID))
         build_dict['PARAMS']['MZBZ'] = '3'
@@ -330,6 +372,47 @@ def build_pacs(pacs_assem_list, build_dict):
         child['FORMLIST']['JCBW'] = assems.ELEMENT_NAME
         child['FORMLIST']['BWBM'] = assems.ELEMENT_CODE
 
+        build_dict['PARAMS']['FORMLISTS'].append(child)
+
+
+def get_report_no_from_lis(lis_report_dict):
+    """
+    从平台查询报告编号
+    :param lis_report_dict:
+    :return:
+    """
+    xml = to_xml(lis_report_dict)
+    log.info('向LIS发送的报告编码获取的xml为:{}'.format(xml))
+    res = _get_lis_client().service.queryReportLists(xml)
+
+    log.info('从LIS平台获取的报告的列表为:{}'.format(res))
+
+    r = _parse_response(res)
+
+    r_Result = r['Results']['Result']
+
+    if isinstance(r_Result, list):
+        return r_Result[0].get('BGBH', None)
+    else:
+        return r_Result.get('BGBH', None)
+
+
+def get_report_result_from_lis(req_lis_results_dict):
+    """
+    从平台查询报告结果明细结果
+    :param req_lis_results_dict:
+    :return:
+    """
+    xml = to_xml(req_lis_results_dict)
+    log.info('向LIS发送的项目结果获取的xml为:{}'.format(xml))
+    res = _get_lis_client().service.reportResults(xml)
+
+    log.info('从LIS平台获取体检结果为:{}'.format(res))
+
+    r = _parse_response(res)
+
+    return r
+
 
 def req_to_lis(req_lis_dict):
     """
@@ -337,7 +420,13 @@ def req_to_lis(req_lis_dict):
     :param req_lis_dict:
     :return:
     """
-    res = _get_lis_client().applicationFrom(to_xml(req_lis_dict))
+    xml = to_xml(req_lis_dict)
+
+    log.info('向LIS发送的xml数据为:[{}]'.format(xml))
+
+    res = _get_lis_client().service.applicationFrom(xml)
+
+    log.info('向LIS发送申请项目返回的数据:{}'.format(res))
     _parse_response(res)
 
 
@@ -347,7 +436,12 @@ def req_to_pacs(req_pacs_dict):
     :param req_pacs_dict:
     :return:
     """
-    res = _get_pacs_client().pacsApplicationFrom(to_xml(req_pacs_dict))
+    xml = to_xml(req_pacs_dict)
+
+    log.info('向PACS发送的xml数据为:[{}]'.format(xml))
+
+    res = _get_pacs_client().service.pacsApplicationFrom(to_xml(req_pacs_dict))
+    log.info('向PACS发送申请项目返回的数据:{}'.format(res))
     _parse_response(res)
 
 
@@ -377,7 +471,8 @@ def get_barcode_from_webservice(YLJGDM, SQJGDM, SYSDM, SQDH, BRID, YWLSH, MZBZ, 
     r['PARAMS']['BBLX'] = BBLX
     r['PARAMS']['TOKEN'] = TOKEN
     req = to_xml(r)
-    res = _get_lis_client().getLisJytm(req)
+    log.info('从平台获取条码请求的参数:[{}]'.format(req))
+    res = _get_lis_client().service.getLisJytm(req)
     res_data = _parse_response(res)
     # 开始解析返回数据中的条码
     barcodes = res_data['Results']['BarCode']

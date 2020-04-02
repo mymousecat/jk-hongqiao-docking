@@ -444,6 +444,9 @@ create index idx_docking_pacs_assem_log_req_no on t_docking_pacs_assem_log
 
 grant select,insert,update,delete on t_docking_pacs_assem_log to 'third'@'%';
 
+-----------------------------------------------------------------------------------
+grant select on t_barcode_detail to 'third'@'%';
+
 
 
 

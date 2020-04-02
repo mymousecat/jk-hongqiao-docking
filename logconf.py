@@ -61,7 +61,7 @@ def _getLogDic(logname):
             },
             # 打印到文件的日志,收集info及以上的日志
             'default': {
-                'level': 'DEBUG',
+                'level': 'INFO',
                 'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件
                 'formatter': 'standard',
                 'filename': logname,  # 日志文件
