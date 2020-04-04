@@ -308,3 +308,26 @@ class BarcodeDetail(db.Model):
     BARCODE_ID = db.Column(db.String)
     ELEMENT_ASSEM_ID = db.Column(db.String)
 
+    # CREATE
+    # TABLE
+    # t_docking_lis_log(
+    # ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    # ORDER_ID INT NOT NULL,
+    # ASSEMS VARCHAR(500),
+    # ASSEM_NAME VARCHAR(200),
+    # IS_SUCCESS VARCHAR(10),
+    # OP VARCHAR(50),
+    # MSG VARCHAR(4096),
+    # CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP --  创建记录时间，默认值为当前时间
+
+
+class DockingLisLog(db.Model):
+    # 体检结果接收日志表
+    __tablename__ = 't_docking_lis_log'
+    ID = db.Column(db.Integer, primary_key=True)
+    ORDER_ID = db.Column(db.String)
+    ASSEMS = db.Column(db.String)
+    ASSEM_NAME = db.Column(db.String)
+    IS_SUCCESS = db.Column(db.BOOLEAN)
+    OP = db.Column(db.String)
+    MSG = db.Column(db.String)

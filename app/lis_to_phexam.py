@@ -99,6 +99,7 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
             _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, '登入', '登入成功', None)
         except Exception as e:
             _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, '登入', None, e)
+
     elif dockingLisFollowing.ZTBZ == '3':  # 表示报告已经完成
         try:
             log.info('开始从平台中，获取报告信息...')
@@ -141,6 +142,8 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
 
             _login()
 
+            assemName = None
+
             for assemId in assems:
                 try:
                     log.info('开始循环获取预约号:{}的项目组id:{}的体检信息'.format(dockingLisFollowing.BRID, assemId))
@@ -153,7 +156,10 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
 
                     elements = assem['elements']
 
-                    log.info('体检系统的项目信息为:{}'.format(elements))
+                    # 项目组名称
+                    assemName = assem['assemName']
+
+                    log.info('获取的体检系统的项目名称为:{}'.format(assemName))
 
                     # 使用外键组成项目字典
                     examElementDict = {}
@@ -222,9 +228,9 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                         lisElement['elementId'] = examElement['elementId']
                         lisElement['checkElementResult'] = hisLisElement.get('JCJG', None)
 
-                        lisElement['ferenceLower'] = None
+                        lisElement['ferenceLower'] = 0
 
-                        lisElement['ferenceUpper'] = None
+                        lisElement['ferenceUpper'] = 0
 
                         # 参考范围,使用新版的参考范围
                         lisElement['showFerence'] = hisLisElement.get('CKFW', None)
@@ -237,22 +243,15 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                         # 危机值的标识？
                         lisElement['criticalValuesSymbol'] = hisLisElement.get('WJZBZ', None)
 
-                        # if hisLisElement.POSITIVE_SYMBOL == '↓':
-                        #     lisElement['positiveSymbol'] = '低'
-                        # elif hisLisElement.POSITIVE_SYMBOL == '↑':
-                        #     lisElement['positiveSymbol'] = '高'
-                        # else:
-                        #     lisElement['positiveSymbol'] = None
-
                         # SUM_JUDGE_TYPE ，项目异常下小结判断：0表示使用体检系统判断业务，1表示使用外接系统根据positiveSymbol判断
 
-                        lisElement['sumJudgeType'] = '1'
+                        lisElement['sumJudgeType'] = 1
 
                         ycts = hisLisElement.get('YCTS', None)
 
                         resultType = examElement['resultType']
 
-                        lisElement['positiveSymbol'] = None
+                        lisElement['positiveSymbol'] = ''
 
                         if resultType == '1':  # 数值类值
                             if ycts == '3':
@@ -261,7 +260,7 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                                 lisElement['positiveSymbol'] = '高'
                         elif resultType == '2':  # 文本类型
                             if ycts != '1':
-                                lisElement['positiveSymbol'] = '阳性'
+                                lisElement['positiveSymbol'] = lisElement['checkElementResult']  # 非正常值的话，这里写检查结果
 
                         lisDatas['items'].append(lisElement)
 
@@ -273,13 +272,11 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                     log.info("开始保存LIS结果....")
                     result = tjAssert(saveLisExamData(examData))
                     log.info(result['msg'])
-
-
+                    _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', 'LIS结果传输成功', None)
                 except Exception as e:
-                    log.error('获取项目组信息失败![{}]'.format(repr(e)))
-                    log.error(e)
+                    _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', None, e)
 
         except Exception as e:
-            pass
+            _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, 'LIS结果传输', None, e)
 
     return r_list

@@ -482,3 +482,19 @@ def get_lis_following(id):
         raise e
     finally:
         db.session.close()
+
+
+def save_lis_log(log):
+    """
+       保存lis结果接收日志
+       :param log:
+       :return:
+       """
+    try:
+        db.session.add(log)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()

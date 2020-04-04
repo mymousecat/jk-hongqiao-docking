@@ -447,6 +447,30 @@ grant select,insert,update,delete on t_docking_pacs_assem_log to 'third'@'%';
 -----------------------------------------------------------------------------------
 grant select on t_barcode_detail to 'third'@'%';
 
+------------------------------------------------------------------------------------
+-- 体检结果接收日志表
+DROP TABLE IF EXISTS t_docking_lis_log;
+
+CREATE TABLE t_docking_lis_log (
+    ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ORDER_ID VARCHAR(100) NOT NULL,
+    ASSEMS VARCHAR(500),
+    ASSEM_NAME VARCHAR(200),
+    IS_SUCCESS VARCHAR(10),
+    OP VARCHAR(50),
+    MSG VARCHAR(4096),
+    CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP --  创建记录时间，默认值为当前时间
+
+) ENGINE MYISAM;
+
+CREATE INDEX idx_docking_lis_log_order_id ON t_docking_lis_log
+(
+  ORDER_ID
+);
+
+grant select,insert,update,delete on t_docking_lis_log  to 'third'@'%';
+
+
 
 
 

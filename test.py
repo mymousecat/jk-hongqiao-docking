@@ -16,7 +16,7 @@ import logging
 from logconf import load_my_logging_cfg
 
 from app.db_op import get_lis_following
-from app.lis_to_phexam import lis_to_phexam
+from app.task_lis_to_phexam import lis_phexam
 
 from app import appconfig
 
@@ -25,6 +25,4 @@ load_my_logging_cfg('test')
 
 if __name__ == '__main__':
     log.info('测试日志')
-    dockLisfollowing = get_lis_following(13)
-    r = lis_to_phexam(3,dockLisfollowing, appconfig['YLJGMM'])
-    log.info(r)
+    lis_phexam()
