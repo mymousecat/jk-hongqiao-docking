@@ -24,7 +24,8 @@ from .models import DockingLisDict, \
     DockingAssemsChanged, \
     DockingPacsRequestView, \
     DockingPacsAssemLog, \
-    BarcodeDetail
+    BarcodeDetail, \
+    ElementAssemSub
 
 from sqlalchemy import and_, or_
 
@@ -222,6 +223,25 @@ def insert_pacs_dict(pacs_dict):
         raise e
     finally:
         db.session.close
+
+
+
+def get_pacs_following_by_id(id):
+    """
+    根据id获取一条检查类状态流水表
+    :param id:
+    :return:
+    """
+    try:
+        query = db.session.query(DockingPacsFollowing)
+        if id is not None:
+            query = query.filter(DockingPacsFollowing.id > id)
+        return query.first()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
 
 
 # DockingPacsFollowing
@@ -477,6 +497,22 @@ def get_lis_following(id):
         if id is not None:
             query = query.filter(DockingLisFollowing.id > id)
         return query.first()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
+
+def get_department_by_assem_id(id):
+    """
+    根据项目组id，在体检系统中，获取到科室id
+    :param id:
+    :return:
+    """
+    try:
+        elementAssemSub = db.session.query(ElementAssemSub).filter(ElementAssemSub.ID == id).first()
+        return elementAssemSub.DEPARTMENT_ID
     except Exception as e:
         db.session.rollback()
         raise e

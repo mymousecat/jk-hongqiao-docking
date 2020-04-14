@@ -470,6 +470,9 @@ CREATE INDEX idx_docking_lis_log_order_id ON t_docking_lis_log
 
 grant select,insert,update,delete on t_docking_lis_log  to 'third'@'%';
 
+-- 体检项目组表授权
+grant select on t_element_assem_sub to 'third'@'%';
+
 
 
 

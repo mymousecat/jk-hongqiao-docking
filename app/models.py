@@ -331,3 +331,12 @@ class DockingLisLog(db.Model):
     IS_SUCCESS = db.Column(db.BOOLEAN)
     OP = db.Column(db.String)
     MSG = db.Column(db.String)
+
+class ElementAssemSub(db.Model):
+    """
+      体检项目组表
+    """
+    __tablename__ = 't_element_assem_sub'
+    ID = db.Column(db.Integer,primary_key=True)
+    DEPARTMENT_ID = db.Column(db.Integer)
+    NAME = db.Column(db.String)
