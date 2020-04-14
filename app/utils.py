@@ -243,7 +243,7 @@ def get_init_dict():
 
 def build_lis_report(dockingLisFollowing, build_dict):
     """
-    获取报告ID参数
+    创建lis报告参数
     :param dockingLisFollowing:
     :param build_dict:
     :return:
@@ -255,6 +255,21 @@ def build_lis_report(dockingLisFollowing, build_dict):
     build_dict['PARAMS']['SQJGDM'] = dockingLisFollowing.SQJGDM
     build_dict['PARAMS']['KSSJ'] = dockingLisFollowing.SJRQ.strftime('%Y-%m-%d %H:%M:%S')
     build_dict['PARAMS']['JSSJ'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def build_pacs_report_result(dockingPacsFollowing, build_dict):
+    """
+    创建pacs报告参数
+    :param dockingPacsFollowing:
+    :param build_dict:
+    :return:
+    """
+    build_dict['PARAMS']['YLJGDM'] = dockingPacsFollowing.YLJGDM
+    build_dict['PARAMS']['BRID'] = dockingPacsFollowing.BRID
+    build_dict['PARAMS']['YWLSH'] = dockingPacsFollowing.YWLSH
+    build_dict['PARAMS']['SQDH'] = dockingPacsFollowing.SQDH
+    build_dict['PARAMS']['MZBZ'] = dockingPacsFollowing.MZBZ
+    build_dict['PARAMS']['SQJGDM'] = dockingPacsFollowing.SQJGDM
 
 
 def build_lis_report_results(dockingLisFollowing, report_no, build_dict):
@@ -411,6 +426,20 @@ def get_report_result_from_lis(req_lis_results_dict):
 
     r = _parse_response(res)
 
+    return r
+
+
+def get_report_result_from_pacs(req_pacs_results_dict):
+    """
+    从平台查询报告pacs结果明细结果
+    :param req_pacs_results_dict:
+    :return:
+    """
+    xml = to_xml(req_pacs_results_dict)
+    log.info('向PACS发送的结果获取的xml为:{}'.format(xml))
+    res = _get_pacs_client().service.pacsReportResults(xml)
+    log.info('从PACS平台获取体检结果为:{}'.format(res))
+    r = _parse_response(res)
     return r
 
 

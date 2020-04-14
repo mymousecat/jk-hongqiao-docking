@@ -225,7 +225,6 @@ def insert_pacs_dict(pacs_dict):
         db.session.close
 
 
-
 def get_pacs_following_by_id(id):
     """
     根据id获取一条检查类状态流水表
@@ -512,7 +511,10 @@ def get_department_by_assem_id(id):
     """
     try:
         elementAssemSub = db.session.query(ElementAssemSub).filter(ElementAssemSub.ID == id).first()
-        return elementAssemSub.DEPARTMENT_ID
+        if elementAssemSub:
+            return elementAssemSub.DEPARTMENT_ID
+        else:
+            return None
     except Exception as e:
         db.session.rollback()
         raise e
