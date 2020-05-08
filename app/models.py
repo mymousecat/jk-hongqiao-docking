@@ -331,6 +331,8 @@ class DockingLisLog(db.Model):
     IS_SUCCESS = db.Column(db.BOOLEAN)
     OP = db.Column(db.String)
     MSG = db.Column(db.String)
+    LIS_RESULT = db.Column(db.Text)
+    BARCODE = db.Column(db.String)
 
 
 class DockingPacsLog(db.Model):

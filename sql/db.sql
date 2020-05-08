@@ -463,10 +463,16 @@ CREATE TABLE t_docking_lis_log (
 
 ) ENGINE MYISAM;
 
+
 CREATE INDEX idx_docking_lis_log_order_id ON t_docking_lis_log
 (
   ORDER_ID
 );
+
+alter table t_docking_lis_log add column LIS_RESULT LONGTEXT;
+alter table t_docking_lis_log add column BARCODE VARCHAR(100);
+
+
 
 grant select,insert,update,delete on t_docking_lis_log  to 'third'@'%';
 

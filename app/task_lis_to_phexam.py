@@ -32,6 +32,8 @@ def _save_lis_log(r):
     log.OP = r['op']
     log.IS_SUCCESS = r['is_success']
     log.MSG = r['msg']
+    log.BARCODE = r['barcode']
+    log.LIS_RESULT = r['lis_result']
     save_lis_log(log)
 
 

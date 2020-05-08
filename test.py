@@ -13,6 +13,7 @@
 """
 
 
+import json
+
 if __name__ == '__main__':
-   if isinstance(None,Exception):
-      print('ok')
+    print(json.dumps(None,ensure_ascii=False))

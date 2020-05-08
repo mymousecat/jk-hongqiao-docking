@@ -41,7 +41,7 @@ def _login():
     log.info('体检系统登录成功')
 
 
-def _appen_msg(r_list, orderId, assems, assem_name, op, msg, ex):
+def _appen_msg(r_list, orderId, assems, assem_name, op, msg, ex, lis_result, barcode):
     r_dict = {
         'orderId': orderId,
         'assems': assems,
@@ -49,10 +49,16 @@ def _appen_msg(r_list, orderId, assems, assem_name, op, msg, ex):
         'op': op,
         'msg': msg if ex is None else repr(ex),
         'is_success': True if ex is None else False,
-        'ex': ex
+        'ex': ex,
+        'lis_result': lis_result,
+        'barcode': barcode
     }
 
     r_list.append(r_dict)
+
+
+def _tojson(obj):
+    return json.dumps(obj, ensure_ascii=False)
 
 
 def _get_opid(lis_results_dict):
@@ -84,6 +90,8 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
 
     r_list = []
 
+    result_dict_list = None
+
     log.info('开始查询本样本号所做的项目....')
     assems = get_assems_by_barcode_id(dockingLisFollowing.ZXTM)
     str_assems = ','.join(assems)
@@ -96,9 +104,12 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
             _login()
             loginAssems(dockingLisFollowing.BRID, str_assems, None)  # 为None的话，为当前的登录者进行操作
             log.info('项目组登入操作成功')
-            _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, '登入', '登入成功', None)
+            _appen_msg(r_list=r_list, orderId=dockingLisFollowing.BRID, assems=str_assems, assem_name=None, op='登入',
+                       msg='登入成功', ex=None, lis_result=None,
+                       barcode=dockingLisFollowing.ZXTM)
         except Exception as e:
-            _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, '登入', None, e)
+            _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, '登入', None, e, None,
+                       dockingLisFollowing.ZXTM)
 
     elif dockingLisFollowing.ZTBZ == '3':  # 表示报告已经完成
         try:
@@ -272,11 +283,14 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                     log.info("开始保存LIS结果....")
                     result = tjAssert(saveLisExamData(examData))
                     log.info(result['msg'])
-                    _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', 'LIS结果传输成功', None)
+                    _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', 'LIS结果传输成功',
+                               None, _tojson(result_dict_list), dockingLisFollowing.ZXTM)
                 except Exception as e:
-                    _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', None, e)
+                    _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', None,
+                               e, _tojson(result_dict_list), dockingLisFollowing.ZXTM)
 
         except Exception as e:
-            _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, 'LIS结果传输', None, e)
+            _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, 'LIS结果传输', None,
+                       e, _tojson(result_dict_list), dockingLisFollowing.ZXTM)
 
     return r_list
