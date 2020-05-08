@@ -403,15 +403,15 @@ def get_pacs_assem_by_id(id, department_id_list):
         if id is not None:
             query = query.filter(DockingAssemsChanged.ID > id)
 
-        query = query.filter(
-            or_(
-                and_(DockingAssemsChanged.UNIT_OR_OWN == '自费', DockingAssemsChanged.COST_STATUS == '已收'),
-                and_(DockingAssemsChanged.UNIT_OR_OWN == '公费', DockingAssemsChanged.DIFFPRICE_STATUS == '否'),
-                and_(DockingAssemsChanged.UNIT_OR_OWN == '公费', DockingAssemsChanged.DIFFPRICE_STATUS == '是',
-                     DockingAssemsChanged.DIFFPRICE_COST_STATUS == '已收')
-
-            )
-        )
+        # query = query.filter(
+        #     or_(
+        #         and_(DockingAssemsChanged.UNIT_OR_OWN == '自费', DockingAssemsChanged.COST_STATUS == '已收'),
+        #         and_(DockingAssemsChanged.UNIT_OR_OWN == '公费', DockingAssemsChanged.DIFFPRICE_STATUS == '否'),
+        #         and_(DockingAssemsChanged.UNIT_OR_OWN == '公费', DockingAssemsChanged.DIFFPRICE_STATUS == '是',
+        #              DockingAssemsChanged.DIFFPRICE_COST_STATUS == '已收')
+        #
+        #     )
+        # )
 
         query = query.filter(DockingAssemsChanged.EXAM_STATUS.in_(('已报到', '分科检查', '等待审核')))
 

@@ -46,7 +46,7 @@ def _appen_msg(r_list, orderId, assems, assem_name, op, msg, ex):
         'assem_name': assem_name,
         'op': op,
         'msg': msg if ex is None else repr(ex),
-        'is_success': True if ex is None else ex,
+        'is_success': True if ex is None else False,
         'ex': ex
     }
 
