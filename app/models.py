@@ -322,7 +322,7 @@ class BarcodeDetail(db.Model):
 
 
 class DockingLisLog(db.Model):
-    # 体检结果接收日志表
+    # 体检结果接收日志表,LIS
     __tablename__ = 't_docking_lis_log'
     ID = db.Column(db.Integer, primary_key=True)
     ORDER_ID = db.Column(db.String)
@@ -331,6 +331,19 @@ class DockingLisLog(db.Model):
     IS_SUCCESS = db.Column(db.BOOLEAN)
     OP = db.Column(db.String)
     MSG = db.Column(db.String)
+
+
+class DockingPacsLog(db.Model):
+    # 体检结果接收日志表,PACS
+    __tablename__ = 't_docking_pacs_log'
+    ID = db.Column(db.Integer, primary_key=True)
+    ORDER_ID = db.Column(db.String)
+    ASSEMS = db.Column(db.String)
+    ASSEM_NAME = db.Column(db.String)
+    IS_SUCCESS = db.Column(db.BOOLEAN)
+    OP = db.Column(db.String)
+    MSG = db.Column(db.String)
+
 
 class ElementAssemSub(db.Model):
     """

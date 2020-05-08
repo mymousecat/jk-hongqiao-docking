@@ -20,6 +20,7 @@ from flask_script import Manager, Command
 from app.task_to_lis import to_lis
 from app.task_to_pacs import to_pacs
 from app.task_lis_to_phexam import lis_phexam
+from app.task_pacs_to_phexam import pacs_phexam
 
 log = logging.getLogger(__name__)
 
@@ -79,9 +80,23 @@ class LisToPhexam(Command):
         _begin_scheduler(scheduler)
 
 
+class PacsToPhexam(Command):
+    """
+     接收PACS结果数据
+    """
+
+    def run(self):
+        load_my_logging_cfg('pacs_to_phexam')
+        # # 第10秒一次
+        scheduler = _get_scheduler()
+        scheduler.add_job(pacs_phexam, id='pacs_to_phexam', trigger='cron', second='*/10', replace_existing=True)
+        _begin_scheduler(scheduler)
+
+
 manager.add_command('to_lis', ToLis())
 manager.add_command('to_pacs', ToPacs())
 manager.add_command('lis_to_phexam', LisToPhexam())
+manager.add_command('pacs_to_phexam', PacsToPhexam())
 
 if __name__ == '__main__':
     manager.run()

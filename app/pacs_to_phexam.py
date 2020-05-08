@@ -18,13 +18,16 @@ from jktj.jktj import loginByUserNamePwd, \
     tjAssert, \
     getUserIdByRealName, \
     loginAssems, \
-    loadExam
-from jktj.tjsaveexam import initSaveExam
+    loadExam, \
+    getDiseaseByName, \
+    saveExamData
+from jktj.tjsaveexam import initSaveExam, addElementResult, addDisease
 
 from jktj.tjexception import TJException
 from .db_op import get_department_by_assem_id
 from . import appconfig
 from .utils import get_init_dict, get_token, build_pacs_report_result, get_report_result_from_pacs
+import json
 
 log = logging.getLogger(__name__)
 
@@ -134,8 +137,40 @@ def pacs_to_phexam(dockingPacsFollowing, SQJGMM):
             log.info('获取到报告者id:{} 审核者id:{}'.format(reporterId, confirmId))
             saveExam = initSaveExam(exam, departmentId, confirmId, reporterId)
 
+            # 小项结果
+            fs = {'others': yxbx}
+            addElementResult(saveExam, exam=exam, opId=reporterId, **fs)
+
+            # 项目结论
+            log.info('获取结论...')
+            writeSymbol = None
+            diseaseCode = None
+            if yybz == '2':  # 阳性
+                result = getDiseaseByName(jcts)
+                if result is None:
+                    writeSymbol = '02'
+                else:
+                    writeSymbol = '01'
+                    diseaseCode = result['msg']['id']
+            elif yybz == '1':  # 阴性
+                writeSymbol = '03'
+
+            log.info("获取诊断方式:{},疾病名称:{},疾病id:{}".format(writeSymbol, jcts, diseaseCode))
+
+            addDisease(saveExam, exam=exam, deptId=departmentId, opId=reporterId, writeSymbol=writeSymbol,
+                       diseaseName=jcts, diseaseCode=diseaseCode)
+
+            # 开始提交分科结果
+            examData = json.dumps(saveExam)
+            log.info(examData)
+            log.info('开始提交分科结果...')
+            result = tjAssert(saveExamData(examData))
+            log.info(result['msg'])
+
+            _appen_msg(r_list, orderId, assemId, assemName, 'PACS结果传输', '体检结果接收成功', None)
 
         except Exception as e:
             _appen_msg(r_list, orderId, assemId, assemName, 'PACS结果传输', repr(e), e)
             log.error('预约号：{} 项目组：{}获取PACS结果失败'.format(orderId, assemId))
             log.error(e)
+    return r_list

@@ -536,3 +536,20 @@ def save_lis_log(log):
         raise e
     finally:
         db.session.close()
+
+
+def save_pacs_log(log):
+    """
+       保存Pacs结果接收日志
+       :param log:
+       :return:
+       """
+    try:
+        db.session.add(log)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
