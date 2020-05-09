@@ -16,4 +16,9 @@
 import json
 
 if __name__ == '__main__':
-    print(json.dumps(None,ensure_ascii=False))
+    a = ['1','2','3']
+    b = ['4','5']
+    c = []
+    c.extend(a)
+    c.extend(b)
+    print(c)

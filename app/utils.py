@@ -406,10 +406,15 @@ def get_report_no_from_lis(lis_report_dict):
 
     r_Result = r['Results']['Result']
 
+    report_nos = []
+
     if isinstance(r_Result, list):
-        return r_Result[0].get('BGBH', None)
+        for result in r_Result:
+            report_nos.append(result.get('BGBH', None))
     else:
-        return r_Result.get('BGBH', None)
+        report_nos.append(r_Result.get('BGBH', None))
+
+    return report_nos
 
 
 def get_report_result_from_lis(req_lis_results_dict):

@@ -58,13 +58,13 @@ def _appen_msg(r_list, orderId, assems, assem_name, op, msg, ex, lis_result, bar
 
 
 def _tojson(obj):
-    return json.dumps(obj, ensure_ascii=False)
+    return json.dumps(obj, ensure_ascii=False, indent=3)
 
 
-def _get_opid(lis_results_dict):
-    opName = lis_results_dict.get('JYYS', None)  # 报告医生
-    auditName = lis_results_dict.get('SHYS', None) if lis_results_dict.get('SHYS',
-                                                                           None) is not None else opName  # 审核医生，如果审核医生为空，则使用报告医生
+def _get_opid(opName, auditName):
+    # opName = lis_results_dict.get('JYYS', None)  # 报告医生
+    # auditName = lis_results_dict.get('SHYS', None) if lis_results_dict.get('SHYS',
+    #                                                                        None) is not None else opName  # 审核医生，如果审核医生为空，则使用报告医生
 
     log.info('获取到报告医生:{}  审核医生:{}'.format(opName, auditName))
 
@@ -90,7 +90,7 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
 
     r_list = []
 
-    result_dict_list = None
+    ll = []
 
     log.info('开始查询本样本号所做的项目....')
     assems = get_assems_by_barcode_id(dockingLisFollowing.ZXTM)
@@ -117,28 +117,38 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
             build_dict = get_init_dict()
             build_lis_report(dockingLisFollowing, build_dict)
             build_dict['PARAMS']['TOKEN'] = get_token(dockingLisFollowing.SQJGDM, SQJGMM, dockingLisFollowing.SQJGDM)
-            report_no = get_report_no_from_lis(build_dict)
-            if not report_no:
+            report_nos = get_report_no_from_lis(build_dict)
+            if len(report_nos) == 0:
                 raise Exception('没有获取到报告编号')
-            log.info('使用报告编码:{}查询项目结果'.format(report_no))
 
-            req_results_dict = get_init_dict()
+            for report_no in report_nos:
+                log.info('使用报告编码:{}查询项目结果'.format(report_no))
 
-            build_lis_report_results(dockingLisFollowing, report_no, req_results_dict)
+                req_results_dict = get_init_dict()
 
-            req_results_dict['PARAMS']['TOKEN'] = get_token(dockingLisFollowing.SQJGDM, SQJGMM,
-                                                            dockingLisFollowing.SQJGDM)
+                build_lis_report_results(dockingLisFollowing, report_no, req_results_dict)
 
-            lis_results = get_report_result_from_lis(req_results_dict)['Results']['Result']
+                req_results_dict['PARAMS']['TOKEN'] = get_token(dockingLisFollowing.SQJGDM, SQJGMM,
+                                                                dockingLisFollowing.SQJGDM)
 
-            ll = []
+                lis_results = get_report_result_from_lis(req_results_dict)['Results']['Result']
 
-            result_dict_list = lis_results['ItemResultList']['ItemResult']
+                # 获取到检验医生和审核医生
+                opName = lis_results.get('JYYS', None)  # 报告医生
+                auditName = lis_results.get('SHYS', None) if lis_results.get('SHYS',
+                                                                             None) is not None else opName  # 审核医生，如果审核医生为空，则使用报告医生
 
-            if isinstance(result_dict_list, list):
-                ll.extend(result_dict_list)
-            else:
-                ll.append(result_dict_list)
+                result_dict_list = lis_results['ItemResultList']['ItemResult']
+
+                if isinstance(result_dict_list, list):
+                    for result in result_dict_list:
+                        result['JYYS'] = opName
+                        result['SHYS'] = auditName
+                        ll.append(result)
+                else:
+                    result_dict_list['JYYS'] = opName
+                    result_dict_list['SHYS'] = auditName
+                    ll.append(result_dict_list)
 
             # 以lis项目id为key，建立字典
             lis_results_map = {}
@@ -218,22 +228,33 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
 
                     log.info('开始生成LIS体检项目...')
 
-                    sampleOpId, opId = _get_opid(lis_results)
+                    # sampleOpId, opId = _get_opid(lis_results)
 
                     lisDatas = {
 
                         'orderId': dockingLisFollowing.BRID,
                         'elementAssemId': assemId,
                         'departmentId': lisDepartment,
-                        'sampleOpId': sampleOpId,  # 报告人
-                        'opId': opId,  # 审核人
+                        'sampleOpId': None,  # 报告人
+                        'opId': None,  # 审核人
                         'items': []
                     }
+
+                    sampleOpId = None
+                    opId = None
+
+                    isGetDoct = True
 
                     for code in both_set:
                         examElement = examElementDict[code]
 
                         hisLisElement = lis_results_map[code]
+
+                        if isGetDoct:  # 开始获取医生,只取一次
+                            sampleOpId, opId = _get_opid(hisLisElement.get('JYYS', None),
+                                                         hisLisElement.get('SHYS', None))
+                            lisDatas['sampleOpId'] = sampleOpId
+                            lisDatas['opId'] = opId
 
                         lisElement = {}
                         lisElement['elementId'] = examElement['elementId']
@@ -274,6 +295,7 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                                 lisElement['positiveSymbol'] = lisElement['checkElementResult']  # 非正常值的话，这里写检查结果
 
                         lisDatas['items'].append(lisElement)
+                        isGetDoct = False
 
                     log.info('开始上传LIS结果数据...')
 
@@ -284,13 +306,13 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                     result = tjAssert(saveLisExamData(examData))
                     log.info(result['msg'])
                     _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', 'LIS结果传输成功',
-                               None, _tojson(result_dict_list), dockingLisFollowing.ZXTM)
+                               None, _tojson(ll), dockingLisFollowing.ZXTM)
                 except Exception as e:
                     _appen_msg(r_list, dockingLisFollowing.BRID, assemId, assemName, 'LIS结果传输', None,
-                               e, _tojson(result_dict_list), dockingLisFollowing.ZXTM)
+                               e, _tojson(ll), dockingLisFollowing.ZXTM)
 
         except Exception as e:
             _appen_msg(r_list, dockingLisFollowing.BRID, str_assems, None, 'LIS结果传输', None,
-                       e, _tojson(result_dict_list), dockingLisFollowing.ZXTM)
+                       e, _tojson(ll), dockingLisFollowing.ZXTM)
 
     return r_list
