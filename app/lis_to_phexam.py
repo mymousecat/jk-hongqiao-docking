@@ -292,7 +292,7 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
                             if ycts == '3':
                                 lisElement['positiveSymbol'] = '高'
                             elif ycts == '4':
-                                lisElement['positiveSymbol'] = '高'
+                                lisElement['positiveSymbol'] = '低'
                         elif resultType == '2':  # 文本类型
                             if ycts != '1':
                                 lisElement['positiveSymbol'] = lisElement['checkElementResult']  # 非正常值的话，这里写检查结果
