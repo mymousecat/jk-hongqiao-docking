@@ -67,7 +67,7 @@ def lis_phexam():
 
         cur.save(dockingLisFollowing.id)
 
-    except NotFoundException as e:
+    except (NotFoundException,TJException) as e:
         cur.save(dockingLisFollowing.id)
         log.error('接收Lis结果时发生错误,预约号为:{}'.format(dockingLisFollowing.BRID))
         log.error(e)

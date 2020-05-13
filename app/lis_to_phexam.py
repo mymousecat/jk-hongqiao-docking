@@ -98,6 +98,9 @@ def lis_to_phexam(lisDepartment, dockingLisFollowing, SQJGMM):
     if len(assems) == 0:
         raise NotFoundException('在检检系统中，未发现条码号为:{}的任何项目组'.format(dockingLisFollowing.ZXTM))
 
+    if not dockingLisFollowing.BRID:
+        raise TJException('不存在的预约号')
+
     if dockingLisFollowing.ZTBZ == '2':  # 表示样本号已经在LIS中登记
         log.info('开始对预约号:{}  项目组列表:{}  进行登入操作'.format(dockingLisFollowing.BRID, str_assems))
         try:
