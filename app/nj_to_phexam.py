@@ -17,21 +17,22 @@ import logging
 import re
 import json
 from .err import InvalidParamException
-from jktj.jktj import loginByUserNamePwd,\
-    tjAssert,\
-    loginAssems,\
-    loadExam,\
-    getUserIdByRealName,\
-    getDiseaseByName,\
+from jktj.jktj import loginByUserNamePwd, \
+    tjAssert, \
+    loginAssems, \
+    loadExam, \
+    getUserIdByRealName, \
+    getDiseaseByName, \
     saveExamData
-from jktj.tjsaveexam import initSaveExam,addElementResult,addDisease
+from jktj.tjsaveexam import initSaveExam, addElementResult, addDisease
 from jktj.tjexception import TJException
+
 # from .models import TJPacsResult
 
 log = logging.getLogger(__name__)
 
 
-def _get_opid(opName,auditName):
+def _get_opid(opName, auditName):
     auditName = auditName if auditName else opName  # 审核医生，如果审核医生为空，则使用报告医生
 
     log.info('获取到报告医生:{}  审核医生:{}'.format(opName, auditName))
@@ -56,13 +57,14 @@ def _login():
     log.info('体检系统登录成功')
 
 
-def nj_to_exam(tjPacsResult,NJ_DEPARTMENT_ID):
-    log.info('开始对内镜记录 id:{} 预约号:{} 检查部位:{}进行操作'.format(tjPacsResult.id,tjPacsResult.register_num,tjPacsResult.check_part))
+def nj_to_exam(tjPacsResult, NJ_DEPARTMENT_ID):
+    log.info(
+        '开始对内镜记录 id:{} 预约号:{} 检查部位:{}进行操作'.format(tjPacsResult.id, tjPacsResult.register_num, tjPacsResult.check_part))
     log.info('开始对诊断部位:{}进行分解...'.format(tjPacsResult.check_part))
-    desc,order_id,assem_id = re.split(r'\^',tjPacsResult.check_part)
+    desc, order_id, assem_id = re.split(r'\^', tjPacsResult.check_part)
     if order_id is None or assem_id is None:
         raise InvalidParamException('无效的部位代码,{}'.format(tjPacsResult.check_part))
-    log.info('获取到预约号:{}  项目组id:{}'.format(order_id,assem_id))
+    log.info('获取到预约号:{}  项目组id:{}'.format(order_id, assem_id))
     log.info('开始检查操作类型:{}'.format(tjPacsResult.rec_type))
     _login()
     if tjPacsResult.rec_type == '1':
@@ -81,7 +83,7 @@ def nj_to_exam(tjPacsResult,NJ_DEPARTMENT_ID):
         element = assem['elements'][0]
 
         # 初始化保存数据
-        reporterId, confirmId = _get_opid(tjPacsResult.report_doctor,tjPacsResult.audit_doctor)
+        reporterId, confirmId = _get_opid(tjPacsResult.report_doctor, tjPacsResult.audit_doctor)
 
         log.info('获取到报告者id:{} 审核者id:{}'.format(reporterId, confirmId))
 
@@ -95,7 +97,7 @@ def nj_to_exam(tjPacsResult,NJ_DEPARTMENT_ID):
         writeSymbol = None
         diseaseCode = None
 
-        dialogs = re.split(r'[\d]+\s*\.|[\d]+\s*、|\r\n',tjPacsResult.check_result)
+        dialogs = re.split(r'[\d]+\s*\.|[\d]+\s*、|\r\n', tjPacsResult.check_result)
 
         writeSymbol = None
         diseaseCode = None
@@ -103,7 +105,7 @@ def nj_to_exam(tjPacsResult,NJ_DEPARTMENT_ID):
         for diaglog in dialogs:
             diseaseCode = None
             if diaglog and diaglog.strip():
-                if diaglog.find('无异常') >= 0 or diaglog.find('无明显异常') >=0: #默认小节
+                if diaglog.find('无异常') >= 0 or diaglog.find('无明显异常') >= 0:  # 默认小节
                     writeSymbol = '03'
                 else:
                     result = getDiseaseByName(diaglog)
@@ -121,14 +123,3 @@ def nj_to_exam(tjPacsResult,NJ_DEPARTMENT_ID):
         log.info('开始提交分科结果...')
         result = tjAssert(saveExamData(examData))
         log.info(result['msg'])
-
-
-
-
-
-
-
-
-
-
-
