@@ -25,7 +25,8 @@ from .models import DockingLisDict, \
     DockingPacsRequestView, \
     DockingPacsAssemLog, \
     BarcodeDetail, \
-    ElementAssemSub
+    ElementAssemSub,\
+    TJPacsResult
 
 from sqlalchemy import and_, or_
 
@@ -501,6 +502,24 @@ def get_lis_following(id):
         raise e
     finally:
         db.session.close()
+
+def get_next_tj_nj(id):
+    """
+    根据id,获取一条pacs结果表的数据
+    :param id:
+    :return:
+    """
+    try:
+        query = db.session.query(TJPacsResult)
+        if id is not None:
+            query = query.filter(TJPacsResult.id > id)
+        return query.first()
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    finally:
+        db.session.close()
+
 
 
 def get_department_by_assem_id(id):

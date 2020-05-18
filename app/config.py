@@ -144,6 +144,29 @@ class Config:
     # 检验科科室ID
     LIS_DEPARTMENT_ID = 3
 
+
+    #内镜(HIS)数据库连接
+    NJ_USERNAME_CONST = "tjcx"
+    NJ_PASSWORD_CONST = "tjcx"
+    NJ_HOST_CONST = "172.168.10.11"
+    NJ_DATABASE_CONST = "PACSDB"
+
+    SQLALCHEMY_BINDS = {
+        # 'jk': 'mysql+pymysql://%s:%s@%s/%s?charset=utf8' % (
+        #     JK_USERNAME_CONST, JK_PASSWORD_CONST, JK_HOST_CONST, JK_DATABASE_CONST),
+        # 'his': 'oracle://%s:%s@%s/%s?charset=gbk' % (
+        #     HIS_USERNAME_CONST, HIS_PASSWORD_CONST, HIS_HOST_CONST, HIS_DATABASE_CONST)
+
+        'nj': 'mssql+pymssql://%s:%s@%s/%s' % (
+            NJ_USERNAME_CONST, NJ_PASSWORD_CONST, NJ_HOST_CONST, NJ_DATABASE_CONST)
+
+
+    }
+
+    # 内镜科室
+    NJ_DEPARTMENT_ID = 35
+
+
 #
 # # 每天的19点至23点，0点到6点,每分种
 # JOBS = [

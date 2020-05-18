@@ -84,7 +84,7 @@ def pacs_to_phexam(dockingPacsFollowing, SQJGMM):
         log.info('开始登记预约号：{} 项目组：{} 的记录'.format(orderId, assemId))
         try:
             _login()
-            loginAssems(orderId, assemId, None)  # 为None的话，为当前的登录者进行操作
+            tjAssert(loginAssems(orderId, assemId, None))  # 为None的话，为当前的登录者进行操作
             log.info('预约号：{} 项目组：{}登入操作成功'.format(orderId, assemId))
             _appen_msg(r_list, orderId, assemId, None, '登入', '登入成功', None)
         except Exception as e:

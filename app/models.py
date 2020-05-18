@@ -355,3 +355,31 @@ class ElementAssemSub(db.Model):
     ID = db.Column(db.Integer,primary_key=True)
     DEPARTMENT_ID = db.Column(db.Integer)
     NAME = db.Column(db.String)
+
+
+class TJPacsResult(db.Model):
+    """
+      体检内镜结果表
+    """
+    __tablename__ = 'TJPacsResult'
+    __bind_key__ = 'nj'
+    id = db.Column(db.Integer,primary_key=True)
+    patient_id = db.Column(db.String)
+    register_num = db.Column(db.String)
+    check_part = db.Column(db.String)
+    rec_type = db.Column(db.String)
+    check_result = db.Column(db.String)
+    check_diag = db.Column(db.String)
+    report_doctor = db.Column(db.String)
+    audit_doctor = db.Column(db.String)
+    #report_url = db.Column(db.String)
+    op_time = db.Column(db.DateTime)
+    postive = db.Column(db.String)
+
+
+
+
+
+
+
+
