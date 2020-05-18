@@ -21,6 +21,7 @@ from app.task_to_lis import to_lis
 from app.task_to_pacs import to_pacs
 from app.task_lis_to_phexam import lis_phexam
 from app.task_pacs_to_phexam import pacs_phexam
+from app.task_nj_to_phexam import nj_phexam
 
 log = logging.getLogger(__name__)
 
@@ -93,10 +94,24 @@ class PacsToPhexam(Command):
         _begin_scheduler(scheduler)
 
 
+class NjToPhexam(Command):
+    """
+     接收内镜结果
+    """
+
+    def run(self):
+        load_my_logging_cfg('nj_to_phexam')
+        # # 第10秒一次
+        scheduler = _get_scheduler()
+        scheduler.add_job(nj_phexam, id='nj_to_phexam', trigger='cron', second='*/10', replace_existing=True)
+        _begin_scheduler(scheduler)
+
+
 manager.add_command('to_lis', ToLis())
 manager.add_command('to_pacs', ToPacs())
 manager.add_command('lis_to_phexam', LisToPhexam())
 manager.add_command('pacs_to_phexam', PacsToPhexam())
+manager.add_command('nj_to_phexam', NjToPhexam())
 
 if __name__ == '__main__':
     manager.run()
